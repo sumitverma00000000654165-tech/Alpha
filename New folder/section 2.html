@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CourseHub | Course Overview — Custom Images Ready</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f6f9fc;
+      font-family: system-ui, 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      line-height: 1.5;
+      color: #1e293b;
+      scroll-behavior: smooth;
+      padding: 2rem 1.5rem 4rem 1.5rem;
+    }
+
+    /* fixed back button (top-left) */
+    .back-btn-fixed {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      padding: 0.7rem 1.3rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      color: #0f172a;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s ease;
+      z-index: 1000;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      font-family: inherit;
+    }
+
+    .back-btn-fixed:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      border-color: #cbd5e1;
+    }
+
+    .back-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .page-header {
+      text-align: center;
+      margin: 0.5rem 0 2.5rem 0;
+    }
+
+    .page-header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1E2A3E, #0f2b3d);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.01em;
+    }
+
+    .page-header p {
+      color: #475569;
+      margin-top: 0.5rem;
+      font-size: 1.05rem;
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .course-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
+      transition: transform 0.25s ease, box-shadow 0.35s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      will-change: transform;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+
+    .courses-grid.loaded .course-card {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .course-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+      background-color: #eef2ff;
+    }
+
+    .course-card:hover .card-img {
+      transform: scale(1.02);
+    }
+
+    .card-content {
+      padding: 1.5rem 1.3rem 1.6rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .course-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.65rem;
+      color: #0f172a;
+    }
+
+    .course-description {
+      font-size: 0.9rem;
+      color: #334155;
+      margin-bottom: 1rem;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .course-price {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0f3b5c;
+      margin-bottom: 1.3rem;
+      letter-spacing: -0.01em;
+    }
+
+    .course-price span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #5b6e8c;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    .btn {
+      flex: 1 0 auto;
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      display: inline-block;
+      border: 1px solid transparent;
+      background: transparent;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-details {
+      background: #f1f5f9;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-details:hover {
+      background: #e6edf4;
+      transform: scale(1.02);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+      border-color: #cbd5e1;
+    }
+
+    .btn-demo {
+      background: #eef2ff;
+      color: #1e40af;
+      border: 1px solid #c7d2fe;
+    }
+
+    .btn-demo:hover {
+      background: #e0e7ff;
+      transform: scale(1.02);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-buy {
+      background: #0f172a;
+      color: white;
+      border: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-buy:hover {
+      background: #2d3a5e;
+      transform: scale(1.02);
+      box-shadow: 0 10px 18px rgba(15, 23, 42, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1.5rem 1rem 3rem 1rem;
+      }
+      .back-btn-fixed {
+        top: 1rem;
+        left: 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+      .page-header h1 {
+        font-size: 1.8rem;
+      }
+      .courses-grid {
+        gap: 1.5rem;
+      }
+      .button-group {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+        padding: 0.8rem 0.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .course-title {
+        font-size: 1.2rem;
+      }
+      .course-price {
+        font-size: 1.4rem;
+      }
+      .card-content {
+        padding: 1.2rem;
+      }
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a, button {
+      transition: all 0.2s;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== FIXED BACK BUTTON ========== -->
+<a href="./INDEX.html" class="back-btn-fixed" id="backButton">
+  <span class="back-icon">←</span> Back
+</a>
+
+<div class="page-header">
+  <h1>Alpha</h1>
+  <p>Customize every image — replace with your own image URL</p>
+</div>
+
+<div class="courses-grid" id="coursesGridContainer"></div>
+
+<script>
+  // ======================================================================
+  // 🖼️ COURSE DATA – FULLY REPLACEABLE IMAGES WITH CUSTOM IMAGE LINKS
+  // ======================================================================
+  // ✅ HOW TO REPLACE ANY COURSE IMAGE:
+  //    Each course object supports an "imageUrl" property. 
+  //    - Add (or edit) the field "imageUrl": "https://your-custom-image.jpg"
+  //    - The image will be used directly. Supports any external/relative URL.
+  //    - If "imageUrl" is not provided or empty, it falls back to:
+  //        1) picsum ID via "imgId" (legacy) 
+  //        2) a default placeholder image (so no broken images ever).
+  //    
+  //    🔁 You can mix: some courses with custom images, others with placeholders.
+  //    📌 All buttons (Details, Demo, Buy) also have fully customizable links.
+  // ----------------------------------------------------------------------
+  
+  const coursesData = [
+    {
+      title: "Nirmal Batch 2026",
+      description: "Nirmal Batch 2026 By Neeraj sir ",
+      price: "RS- 799.00",
+      imgId: "",                     // fallback (empty -> will use default if no custom image)
+      // 🎯 CUSTOM IMAGE LINK (replace with your own image URL):
+      imageUrl: "./WhatsApp Image 2026-04-08 at 8.06.41 PM.jpeg",   // High-res nature image (replaceable)
+      detailsLink: "./view1.html",
+      demoLink: "./under1.html",
+      buyLink: ""
+    },
+    {
+      title: "Full Stack JavaScript",
+      description: "Node.js, Express, MongoDB, GraphQL. Deploy full‑stack apps with JWT authentication.",
+      price: "$99.00",
+      imgId: "20",
+      // 👇 CUSTOM IMAGE EXAMPLE (replace with any link)
+      imageUrl: "https://picsum.photos/id/26/500/280",    // Venice streetscape (custom)
+      detailsLink: "./view2.html",
+      demoLink: "./under2.html",
+      buyLink: ""
+    },
+    {
+      title: "Python for Data Science",
+      description: "Pandas, NumPy, Matplotlib, Seaborn, and intro to ML. Hands-on real datasets.",
+      price: "$89.50",
+      imgId: "33",
+      imageUrl: "",                  // Leave empty → uses imgId fallback (picsum id 33)
+      detailsLink: "./view3.html",
+      demoLink: "./under3.html",
+      buyLink: ""
+    },
+    {
+      title: "UI/UX Design Pro",
+      description: "Figma, prototyping, user research, design systems. Portfolio-ready projects.",
+      price: "$69.99",
+      imgId: "44",
+      imageUrl: "",                  // uses fallback imgId (picsum id 44)
+      detailsLink: "./view4.html",
+      demoLink: "./under4.html",
+      buyLink: ""
+    },
+    {
+      title: "DevOps with Kubernetes",
+      description: "Docker, K8s, CI/CD pipelines, AWS EKS, monitoring with Prometheus.",
+      price: "$119.00",
+      imgId: "55",
+      imageUrl: "",                  // uses fallback imgId
+      detailsLink: "./view5.html",
+      demoLink: "./under5.html",
+      buyLink: ""
+    },
+    {
+      title: "Mobile App Development (React Native)",
+      description: "Cross-platform apps, native features, Expo, and App Store deployment.",
+      price: "$84.99",
+      imgId: "66",
+      imageUrl: "",                  // fallback to picsum id 66
+      detailsLink: "./view6.html",
+      demoLink: "./under6.html",
+      buyLink: ""
+    },
+    {
+      title: "Cloud Computing (AWS)",
+      description: "EC2, S3, Lambda, serverless, cloud architecture and cost optimization.",
+      price: "$109.00",
+      imgId: "77",
+      // 🔥 Example: Custom image from cloud storage (replace with any URL)
+      imageUrl: "https://picsum.photos/id/91/500/280",   // vibrant neon light
+      detailsLink: "./view7.html",
+      demoLink: "./under7.html",
+      buyLink: ""
+    },
+    {
+      title: "Blockchain Fundamentals",
+      description: "Solidity, smart contracts, Web3.js, DeFi basics and NFT marketplace.",
+      price: "$94.50",
+      imgId: "88",
+      imageUrl: "",                  // uses fallback (imgId 88)
+      detailsLink: "./view8.html",
+      demoLink: "./under8.html",
+      buyLink: ""
+    },
+    {
+      title: "Artificial Intelligence & ML",
+      description: "TensorFlow, scikit-learn, neural networks, computer vision basics.",
+      price: "$129.00",
+      imgId: "99",
+      imageUrl: "",                  // fallback to picsum 99
+      detailsLink: "./view9.html",
+      demoLink: "./under9.html",
+      buyLink: ""
+    },
+    {
+      title: "Cybersecurity Essentials",
+      description: "Network security, cryptography, ethical hacking, risk management.",
+      price: "$74.99",
+      imgId: "101",
+      imageUrl: "",                  // fallback to default image handling
+      detailsLink: "./view10.html",
+      demoLink: "./under10.html",
+      buyLink: ""
+    },
+    {
+      title: "Digital Marketing Strategy",
+      description: "SEO, Google Ads, content marketing, analytics, and growth hacking.",
+      price: "$59.99",
+      imgId: "102",
+      // 💡 CUSTOM IMAGE LINK (set any image you want)
+      imageUrl: "https://picsum.photos/id/20/500/280",   // coffee & laptop
+      detailsLink: "./view11.html",
+      demoLink: "./under11.html",
+      buyLink: ""
+    },
+    {
+      title: "Product Management",
+      description: "Agile, roadmaps, user stories, metrics, and product lifecycle.",
+      price: "$89.00",
+      imgId: "103",
+      imageUrl: "",                  // fallback to picsum id 103
+      detailsLink: "./view12.html",
+      demoLink: "./under12.html",
+      buyLink: ""
+    }
+  ];
+
+  // ----------------------------------------------------------------------
+  // 🖼️ INTELLIGENT IMAGE SOURCE RESOLVER:
+  //    Priority: custom imageUrl > legacy imgId > default fallback image
+  //    => ensures EVERY image is replaceable and NO broken images
+  // ----------------------------------------------------------------------
+  function getCourseImageSrc(course) {
+    // 1) If a custom imageUrl is provided and not empty → use it (fully replaceable)
+    if (course.imageUrl && typeof course.imageUrl === 'string' && course.imageUrl.trim() !== "") {
+      return course.imageUrl.trim();
+    }
+    
+    // 2) If legacy imgId exists and is a valid non-empty string/number → use picsum
+    if (course.imgId && course.imgId.toString().trim() !== "") {
+      return `https://picsum.photos/id/${course.imgId}/500/280`;
+    }
+    
+    // 3) Ultimate fallback: beautiful default image (never broken UI)
+    return "./WhatsApp Image 2026-04-08 at 8.06.41 PM.jpeg";  // default mountain & laptop-friendly
+  }
+
+  // Helper: returns proper href (if custom link provided, else "#")
+  function getLink(providedLink) {
+    return providedLink && providedLink.trim() !== "" ? providedLink : "#";
+  }
+
+  // Create a single course card with fully customizable image + button links
+  function createCourseCard(course, index) {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'course-card';
+
+    // Image element with dynamic, replaceable source
+    const img = document.createElement('img');
+    img.src = getCourseImageSrc(course);
+    img.alt = course.title;
+    img.loading = 'lazy';
+    img.className = 'card-img';
+    // Optional: handle broken custom images gracefully (silent fallback but user sees alt)
+    img.onerror = function() {
+      // If custom image fails to load, replace with default fallback (but do not loop)
+      if (!this.src.includes('picsum.photos/id/1/500/280')) {
+        this.src = "https://picsum.photos/id/1/500/280";
+      }
+    };
+
+    // Content wrapper
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'card-content';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'course-title';
+    titleEl.textContent = course.title;
+
+    const descEl = document.createElement('p');
+    descEl.className = 'course-description';
+    descEl.textContent = course.description;
+
+    const priceEl = document.createElement('div');
+    priceEl.className = 'course-price';
+    priceEl.innerHTML = `${course.price} <span>INR</span>`;
+
+    // Button group
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'button-group';
+
+    // ----- View Details Button -----
+    const detailsBtn = document.createElement('a');
+    detailsBtn.href = getLink(course.detailsLink);
+    detailsBtn.className = 'btn btn-details';
+    detailsBtn.textContent = 'View Details';
+    detailsBtn.setAttribute('data-course-id', index + 1);
+
+    // ----- View Demo Button -----
+    const demoBtn = document.createElement('a');
+    demoBtn.href = getLink(course.demoLink);
+    demoBtn.className = 'btn btn-demo';
+    demoBtn.textContent = 'View Demo';
+    demoBtn.setAttribute('data-course-id', index + 1);
+
+    // ----- Buy Now Button -----
+    const buyBtn = document.createElement('a');
+    buyBtn.href = getLink(course.buyLink);
+    buyBtn.className = 'btn btn-buy';
+    buyBtn.textContent = 'Buy Now';
+    buyBtn.setAttribute('data-course-id', index + 1);
+
+    btnGroup.appendChild(detailsBtn);
+    btnGroup.appendChild(demoBtn);
+    btnGroup.appendChild(buyBtn);
+
+    contentDiv.appendChild(titleEl);
+    contentDiv.appendChild(descEl);
+    contentDiv.appendChild(priceEl);
+    contentDiv.appendChild(btnGroup);
+
+    cardDiv.appendChild(img);
+    cardDiv.appendChild(contentDiv);
+
+    return cardDiv;
+  }
+
+  // Render all courses dynamically
+  function renderCourses() {
+    const container = document.getElementById('coursesGridContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    coursesData.forEach((course, idx) => {
+      const card = createCourseCard(course, idx);
+      container.appendChild(card);
+    });
+
+    // Trigger entrance animation
+    requestAnimationFrame(() => {
+      container.classList.add('loaded');
+    });
+  }
+
+  // Initialize on DOM ready
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCourses();
+  });
+</script>
+
+<!-- 
+  =========================================================================
+  ✅ FULL CUSTOM IMAGE REPLACEMENT GUIDE (HOW TO USE):
+  
+  ** TO REPLACE ANY COURSE IMAGE WITH YOUR OWN CUSTOM LINK **
+  
+  1. Locate the `coursesData` array inside the <script> tag.
+  2. Find the course you want to edit (e.g., "Modern Frontend Mastery").
+  3. Add or modify the `imageUrl` property:
+     
+     Example:
+        imageUrl: "https://your-domain.com/images/awesome-course.jpg"
+     
+  4. Save the file. That's it! The course will now display YOUR custom image.
+  
+  💡 TIPS:
+     - You can use absolute URLs (https://...) or relative paths (images/course.jpg).
+     - If you leave `imageUrl` empty (""), the system will automatically use the legacy
+       placeholder (either from `imgId` or a default safe image).
+     - All images are responsive, with object-fit: cover for perfect card proportions.
+     - Broken image fallback: If a custom image fails to load, it will show a default
+       placeholder automatically (no broken UI).
+  
+  🔁 MIX AND MATCH:
+     - Some courses can have custom images, others can keep placeholders.
+     - Every single course image is 100% replaceable without touching CSS or layout.
+  
+  ✅ BUTTON CUSTOMIZATION ALSO AVAILABLE:
+     - Each course has `detailsLink`, `demoLink`, `buyLink` – fill with your own URLs.
+  
+  =========================================================================
+  FULLY DYNAMIC + SCALABLE: images, links, and content are all data-driven.
+  =========================================================================
+-->
+</body>
+</html>

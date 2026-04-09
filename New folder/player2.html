@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ALPHA</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0a0c12 0%, #0f1117 100%);
+      color: #f1f3f9;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+      background: rgba(18, 22, 32, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 2rem;
+      padding: 1rem 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #E0E7FF, #9F7AEA);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+    }
+
+    .logo span {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #8b93b0;
+    }
+
+    .search-wrapper {
+      flex: 1;
+      max-width: 380px;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 0.8rem 1.2rem;
+      background: rgba(28, 32, 46, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 2rem;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .search-bar:focus {
+      border-color: #9F7AEA;
+      background: #141824;
+      box-shadow: 0 0 0 3px rgba(159, 122, 234, 0.2);
+    }
+
+    .btn-add {
+      background: linear-gradient(105deg, #7c3aed, #a855f7);
+      border: none;
+      padding: 0.75rem 1.8rem;
+      border-radius: 2.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 8px 18px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-add:hover {
+      transform: scale(1.02);
+      background: linear-gradient(105deg, #8b5cf6, #c084fc);
+      box-shadow: 0 12px 22px rgba(124, 58, 237, 0.45);
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .video-card {
+      background: rgba(22, 26, 38, 0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      transition: all 0.25s ease-in-out;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+    }
+
+    .video-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(159, 122, 234, 0.4);
+      box-shadow: 0 28px 36px -14px rgba(0, 0, 0, 0.6);
+      background: rgba(30, 35, 50, 0.85);
+    }
+
+    .thumbnail-wrapper {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #0b0e16;
+    }
+
+    .thumbnail-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .thumbnail-img {
+      transform: scale(1.03);
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s;
+      backdrop-filter: blur(2px);
+    }
+
+    .video-card:hover .play-overlay {
+      opacity: 1;
+    }
+
+    .play-icon {
+      background: rgba(255, 255, 255, 0.95);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #1e1a2f;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      transition: 0.15s;
+    }
+
+    .play-icon:hover {
+      transform: scale(1.05);
+      background: white;
+    }
+
+    .card-content {
+      padding: 1rem 1rem 1.2rem;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: #b9c2d9;
+      margin-bottom: 0.75rem;
+      display: -webkit-box;
+       -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      background: rgba(159, 122, 234, 0.2);
+      padding: 0.2rem 0.65rem;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #cdb4ff;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 0.7rem;
+      margin-top: 0.2rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 30px;
+      transition: 0.1s;
+      color: #cad2ed;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .action-btn.notes-btn {
+      background: rgba(100, 108, 255, 0.25);
+      color: #c7d2fe;
+      font-size: 0.9rem;
+      padding: 8px 18px;
+      font-weight: 600;
+      border: 1px solid rgba(100, 108, 255, 0.5);
+    }
+
+    .action-btn.notes-btn:hover {
+      background: #4f46e5;
+      color: white;
+      transform: scale(1.02);
+    }
+
+    .action-btn.edit-btn:hover {
+      background: #2d3a5e;
+      color: #ffd966;
+    }
+
+    .action-btn.delete-btn:hover {
+      background: #3e2a3a;
+      color: #ff8a7a;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: rgba(20, 24, 36, 0.6);
+      border-radius: 2rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .empty-state h3 {
+      font-size: 1.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #12161f;
+      border-radius: 2rem;
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+      animation: fadeUp 0.2s ease;
+    }
+
+    .player-modal-card {
+      max-width: 1000px;
+      width: 95%;
+      background: #0b0e14;
+      padding: 1rem;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.8rem;
+      background: #1a1f2c;
+      border: 1px solid #2e3548;
+      border-radius: 1rem;
+      color: white;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: #9F7AEA;
+    }
+
+    .btn-submit {
+      background: #7c3aed;
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 2rem;
+      font-weight: bold;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+    }
+
+    .video-player-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border-radius: 1rem;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    video, iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+    }
+
+    .player-error {
+      color: #ffb7b2;
+      background: #2a1a1f;
+      padding: 1.5rem;
+      text-align: center;
+      border-radius: 1rem;
+      font-size: 0.95rem;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .toast-message {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293bcc;
+      backdrop-filter: blur(12px);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      z-index: 1200;
+      border-left: 5px solid #9F7AEA;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem;
+      }
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .btn-add {
+        justify-content: center;
+      }
+      .card-actions {
+        justify-content: center;
+      }
+      .action-btn.notes-btn {
+        padding: 6px 14px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="header">
+    <div class="logo">
+      <h1>Alpha<span> | secure video gallery</span></h1>
+    </div>
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Search by title, description, tags...">
+    </div>
+    <button class="btn-add" id="openAddModalBtn"></button>
+  </div>
+
+  <div id="videosGrid" class="videos-grid">
+    <!-- dynamic cards injected -->
+  </div>
+</div>
+
+<!-- MODAL: Add / Edit video form -->
+<div id="formModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="formModalTitle">Video Details</h2>
+      <button class="close-modal" id="closeFormModalBtn">&times;</button>
+    </div>
+    <form id="videoForm">
+      <input type="hidden" id="videoId" value="">
+      <div class="form-group">
+        <label>🎬 Title *</label>
+        <input type="text" id="videoTitle" placeholder="Enter video title" required>
+      </div>
+      <div class="form-group">
+        <label>🔗 Video URL (YouTube / direct .mp4 or .webm) *</label>
+        <input type="url" id="videoUrl" placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4" required>
+        <small style="color:#8b93b0;">Supports YouTube, Vimeo, and direct MP4 links. No direct download links will be shown.</small>
+      </div>
+      <div class="form-group">
+        <label>🖼️ Thumbnail Image URL *</label>
+        <input type="url" id="thumbnailUrl" placeholder="https://example.com/thumb.jpg" required>
+      </div>
+      <div class="form-group">
+        <label>📝 Short Description *</label>
+        <textarea id="videoDesc" rows="2" placeholder="Brief description of the video..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>📔 Notes Link (custom URL for additional resources)</label>
+        <input type="url" id="notesLink" placeholder="https://example.com/notes-for-this-video">
+        <small style="color:#8b93b0;">Optional: link to slides, docs, or external notes</small>
+      </div>
+      <div class="form-group">
+        <label>🏷️ Tags (comma separated)</label>
+        <input type="text" id="videoTags" placeholder="cinematic, nature, tutorial">
+      </div>
+      <button type="submit" class="btn-submit">💾 Save Video</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Video Player with NO direct link to source -->
+<div id="playerModal" class="modal">
+  <div class="modal-card player-modal-card">
+    <div class="modal-header">
+      <h3 id="playerModalTitle">Now Playing</h3>
+      <button class="close-modal" id="closePlayerBtn">&times;</button>
+    </div>
+    <div id="playerContainer" class="video-player-wrapper">
+      <!-- dynamic video / iframe with secure fallback (no direct link) -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- GLOBAL STATE ----------
+  let videosArray = [];
+
+  // ---------- VIDEO PLAYBACK: NO DIRECT LINK ACCESS ----------
+  function getYouTubeEmbedId(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }
+  
+  function getVimeoEmbedId(url) {
+    const vimeoRegex = /(?:vimeo\.com\/(?:video\/)?)(\d+)/;
+    const match = url.match(vimeoRegex);
+    return match ? match[1] : null;
+  }
+
+  // Generate player HTML without any direct link to the video source
+  function generatePlayerHTML(videoUrl, videoTitle = "Video") {
+    if (!videoUrl || videoUrl.trim() === "") {
+      return `<div class="player-error">
+                <span>⚠️ No video URL provided.</span>
+                <small>Please edit this video and add a valid YouTube, Vimeo, or direct MP4 link.</small>
+              </div>`;
+    }
+    
+    const youtubeId = getYouTubeEmbedId(videoUrl);
+    if (youtubeId) {
+      return `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=0&modestbranding=1&rel=0&showinfo=0&controls=1&enablejsapi=1" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+        allowfullscreen frameborder="0" 
+        title="YouTube player"></iframe>`;
+    }
+    
+    const vimeoId = getVimeoEmbedId(videoUrl);
+    if (vimeoId) {
+      return `<iframe src="https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479" 
+        allow="autoplay; fullscreen; picture-in-picture" 
+        allowfullscreen frameborder="0" 
+        title="Vimeo player"></iframe>`;
+    }
+    
+    // Direct video file: MP4/WebM. No fallback link provided to the user.
+    return `<video controls controlsList="nodownload" style="width:100%; height:100%;" preload="metadata">
+              <source src="${escapeHtmlAttr(videoUrl)}" type="video/mp4">
+              <source src="${escapeHtmlAttr(videoUrl)}" type="video/webm">
+              <source src="${escapeHtmlAttr(videoUrl)}" type="video/ogg">
+              Your browser does not support the video tag.
+            </video>`;
+  }
+  
+  function escapeHtmlAttr(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // Attach video error handler but WITHOUT any direct link or "open directly" option
+  function attachVideoErrorHandler(container) {
+    const videoElem = container.querySelector('video');
+    if (videoElem) {
+      const handleError = () => {
+        if (!container.querySelector('.video-error-fallback')) {
+          const errorMsg = videoElem.error ? getVideoErrorMessage(videoElem.error.code) : 'Playback failed.';
+          const fallbackDiv = document.createElement('div');
+          fallbackDiv.className = 'player-error video-error-fallback';
+          fallbackDiv.style.position = 'absolute';
+          fallbackDiv.style.top = '0';
+          fallbackDiv.style.left = '0';
+          fallbackDiv.style.width = '100%';
+          fallbackDiv.style.height = '100%';
+          fallbackDiv.style.backgroundColor = '#0f0f17';
+          fallbackDiv.style.zIndex = '10';
+          fallbackDiv.style.display = 'flex';
+          fallbackDiv.style.flexDirection = 'column';
+          fallbackDiv.style.alignItems = 'center';
+          fallbackDiv.style.justifyContent = 'center';
+          fallbackDiv.style.gap = '12px';
+          fallbackDiv.style.padding = '1rem';
+          fallbackDiv.style.textAlign = 'center';
+          // NO direct link to video source — only retry option
+          fallbackDiv.innerHTML = `
+            <span>🎬 ${errorMsg}</span>
+            <small>Possible reasons: unsupported format, network issue, or broken link.</small>
+            <button id="retryVideoBtn" style="background:#4f46e5; border:none; padding:8px 20px; border-radius:40px; color:white; cursor:pointer; margin-top:8px; font-weight:500;">⟳ Retry Playback</button>
+            <small style="margin-top:8px; opacity:0.7;">Direct video links are not provided for security.</small>
+          `;
+          container.style.position = 'relative';
+          container.appendChild(fallbackDiv);
+          const retryBtn = fallbackDiv.querySelector('#retryVideoBtn');
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+              videoElem.load();
+              fallbackDiv.remove();
+            });
+          }
+        }
+      };
+      videoElem.addEventListener('error', handleError, { once: false });
+      if (videoElem.networkState === 3 || videoElem.error) {
+        handleError();
+      }
+    }
+  }
+  
+  function getVideoErrorMessage(code) {
+    switch(code) {
+      case MediaError.MEDIA_ERR_ABORTED: return 'Video loading was aborted.';
+      case MediaError.MEDIA_ERR_NETWORK: return 'Network error while loading video.';
+      case MediaError.MEDIA_ERR_DECODE: return 'Video format not supported or corrupted.';
+      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED: return 'Video URL not supported or invalid.';
+      default: return 'Cannot play this video.';
+    }
+  }
+
+  // localStorage helpers
+  function saveToLocalStorage() {
+    localStorage.setItem('videoGallery_player2', JSON.stringify(videosArray));
+  }
+
+  // Create example videos (safe, working samples)
+  function createExampleVideos() {
+    return [
+      {
+        id: `demo-${Date.now()}-1`,
+        title: "Big Buck Bunny (Sample)",
+        url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        thumbnail: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+        description: "Open source short film — perfect quality test. Direct MP4 playback (no external link exposed).",
+        tags: ["sample", "animation", "4k"],
+        notesLink: "https://peach.blender.org/"
+      },
+      {
+        id: `demo-${Date.now()}-2`,
+        title: "Sintel Trailer",
+        url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+        thumbnail: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg",
+        description: "Epic fantasy short by Blender Foundation.",
+        tags: ["fantasy", "blender", "short film"],
+        notesLink: "https://www.sintel.org/"
+      },
+      {
+        id: `demo-${Date.now()}-3`,
+        title: "Earth Timelapse (YouTube)",
+        url: "https://www.youtube.com/watch?v=zN9LZ3ojnxY",
+        thumbnail: "https://img.youtube.com/vi/zN9LZ3ojnxY/maxresdefault.jpg",
+        description: "Stunning earth timelapse from space. YouTube embed.",
+        tags: ["timelapse", "nature", "earth"],
+        notesLink: "https://earthengine.google.com/timelapse/"
+      },
+      {
+        id: `demo-${Date.now()}-4`,
+        title: "For Bigger Blazes (Sample)",
+        url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        thumbnail: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
+        description: "Vibrant short clip, perfect for testing video controls.",
+        tags: ["demo", "vibrant"],
+        notesLink: ""
+      },
+      {
+        id: `demo-${Date.now()}-5`,
+        title: "What is Web Development?",
+        url: "https://www.youtube.com/watch?v=DHjqpvDnNGE",
+        thumbnail: "https://img.youtube.com/vi/DHjqpvDnNGE/mqdefault.jpg",
+        description: "Intro to web dev — great educational content with notes link.",
+        tags: ["tutorial", "webdev", "education"],
+        notesLink: "https://developer.mozilla.org/"
+      }
+    ];
+  }
+
+  function loadInitialData() {
+    const stored = localStorage.getItem('videoGallery_player2');
+    if (stored) {
+      videosArray = JSON.parse(stored);
+      videosArray = videosArray.map(v => ({ 
+        ...v, 
+        tags: v.tags || [],
+        notesLink: v.notesLink || "",
+        url: v.url || "",
+        thumbnail: v.thumbnail || "https://picsum.photos/id/20/300/200"
+      }));
+      if (videosArray.length === 0) {
+        videosArray = createExampleVideos();
+        saveToLocalStorage();
+      }
+    } else {
+      videosArray = createExampleVideos();
+      saveToLocalStorage();
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function renderVideos() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    const grid = document.getElementById('videosGrid');
+    if (!grid) return;
+
+    let filtered = [...videosArray];
+    if (searchTerm) {
+      filtered = filtered.filter(video => {
+        const titleMatch = video.title.toLowerCase().includes(searchTerm);
+        const descMatch = video.description.toLowerCase().includes(searchTerm);
+        const tagsMatch = video.tags && video.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+        return titleMatch || descMatch || tagsMatch;
+      });
+    }
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="empty-state">
+                          <h3>🎬 No videos found</h3>
+                          <p>Adjust your search or add a new video ✨</p>
+                        </div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(video => {
+      const notesLinkAttr = video.notesLink && video.notesLink.trim() !== "" ? video.notesLink : "#";
+      const tagSpans = video.tags && video.tags.length 
+        ? video.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')
+        : '<span class="tag">media</span>';
+      return `
+      <div class="video-card" data-id="${video.id}">
+        <div class="thumbnail-wrapper">
+          <img class="thumbnail-img" src="${escapeHtml(video.thumbnail)}" alt="${escapeHtml(video.title)}" loading="lazy" onerror="this.src='https://picsum.photos/id/100/300/200'">
+          <div class="play-overlay play-trigger" data-id="${video.id}">
+            <div class="play-icon">▶</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-title">${escapeHtml(video.title)}</div>
+          <div class="card-desc">${escapeHtml(video.description)}</div>
+          <div class="tag-group">
+            ${tagSpans}
+          </div>
+          <div class="card-actions">
+            <button class="action-btn notes-btn" data-id="${video.id}" data-action="notes" data-notes-url="${escapeHtmlAttr(notesLinkAttr)}">📘 View Notes</button>
+            <button class="action-btn edit-btn" data-id="${video.id}" data-action="edit">✏️ Edit</button>
+            <button class="action-btn delete-btn" data-id="${video.id}" data-action="delete">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>
+    `}).join('');
+
+    // attach listeners
+    document.querySelectorAll('.video-card').forEach(card => {
+      const videoId = card.getAttribute('data-id');
+      card.addEventListener('click', (e) => {
+        const targetBtn = e.target.closest('.action-btn');
+        if (targetBtn) return;
+        const video = videosArray.find(v => v.id === videoId);
+        if (video) openPlayerModal(video);
+      });
+      const playOverlay = card.querySelector('.play-trigger');
+      if (playOverlay) {
+        playOverlay.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const video = videosArray.find(v => v.id === videoId);
+          if (video) openPlayerModal(video);
+        });
+      }
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const video = videosArray.find(v => v.id === id);
+        if (video) openEditModal(video);
+      });
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        if (confirm('Delete this video permanently?')) {
+          videosArray = videosArray.filter(v => v.id !== id);
+          saveToLocalStorage();
+          renderVideos();
+          showToast('🗑️ Video deleted', '#ff8a7a');
+        }
+      });
+    });
+    document.querySelectorAll('.notes-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const notesUrl = btn.getAttribute('data-notes-url');
+        if (!notesUrl || notesUrl === "#") {
+          showToast('⚠️ No notes link provided. Edit and add a custom link.', '#ffaa66');
+          return;
+        }
+        window.open(notesUrl, '_blank');
+      });
+    });
+  }
+
+  // Modal logic: add / edit
+  const formModal = document.getElementById('formModal');
+  const videoForm = document.getElementById('videoForm');
+  const formModalTitle = document.getElementById('formModalTitle');
+  const closeFormBtn = document.getElementById('closeFormModalBtn');
+  const openAddBtn = document.getElementById('openAddModalBtn');
+
+  function resetForm() {
+    document.getElementById('videoId').value = '';
+    document.getElementById('videoTitle').value = '';
+    document.getElementById('videoUrl').value = '';
+    document.getElementById('thumbnailUrl').value = '';
+    document.getElementById('videoDesc').value = '';
+    document.getElementById('notesLink').value = '';
+    document.getElementById('videoTags').value = '';
+  }
+
+  function openEditModal(video) {
+    document.getElementById('videoId').value = video.id;
+    document.getElementById('videoTitle').value = video.title;
+    document.getElementById('videoUrl').value = video.url || '';
+    document.getElementById('thumbnailUrl').value = video.thumbnail;
+    document.getElementById('videoDesc').value = video.description;
+    document.getElementById('notesLink').value = video.notesLink || '';
+    document.getElementById('videoTags').value = (video.tags || []).join(', ');
+    formModalTitle.innerText = '✏️ Edit Video';
+    formModal.classList.add('active');
+  }
+
+  function openAddModal() {
+    resetForm();
+    formModalTitle.innerText = '🎬 Add New Video';
+    formModal.classList.add('active');
+  }
+
+  function closeFormModal() {
+    formModal.classList.remove('active');
+    resetForm();
+  }
+
+  videoForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const idField = document.getElementById('videoId').value;
+    const title = document.getElementById('videoTitle').value.trim();
+    const url = document.getElementById('videoUrl').value.trim();
+    const thumbnail = document.getElementById('thumbnailUrl').value.trim();
+    const description = document.getElementById('videoDesc').value.trim();
+    const notesLink = document.getElementById('notesLink').value.trim();
+    const tagsRaw = document.getElementById('videoTags').value.trim();
+    const tagsArray = tagsRaw ? tagsRaw.split(',').map(t => t.trim().toLowerCase()).filter(t => t) : [];
+
+    if (!title || !url || !thumbnail || !description) {
+      showToast('❌ All fields (title, URL, thumbnail, description) are required!', '#ffaa88');
+      return;
+    }
+
+    if (idField) {
+      const index = videosArray.findIndex(v => v.id === idField);
+      if (index !== -1) {
+        videosArray[index] = { ...videosArray[index], title, url, thumbnail, description, notesLink, tags: tagsArray };
+        showToast('✏️ Video updated successfully!', '#8bcbff');
+      }
+    } else {
+      const newId = Date.now() + '-' + Math.random().toString(36).substr(2, 8);
+      videosArray.push({ id: newId, title, url, thumbnail, description, notesLink, tags: tagsArray });
+      showToast('✅ New video added!', '#a0e7a0');
+    }
+    saveToLocalStorage();
+    renderVideos();
+    closeFormModal();
+  });
+
+  openAddBtn.addEventListener('click', openAddModal);
+  closeFormBtn.addEventListener('click', closeFormModal);
+  window.addEventListener('click', (e) => {
+    if (e.target === formModal) closeFormModal();
+    if (e.target === playerModal) closePlayerModal();
+  });
+
+  // Player Modal with secure handling (no direct link)
+  const playerModal = document.getElementById('playerModal');
+  const playerContainer = document.getElementById('playerContainer');
+  const closePlayerBtn = document.getElementById('closePlayerBtn');
+  const playerModalTitleSpan = document.getElementById('playerModalTitle');
+
+  function openPlayerModal(video) {
+    if (!video.url || video.url.trim() === '') {
+      showToast('⚠️ This video has no URL. Please edit and add a valid video link.', '#ffaa66');
+      return;
+    }
+    playerModalTitleSpan.innerText = video.title || 'Now Playing';
+    const playerHTML = generatePlayerHTML(video.url, video.title);
+    playerContainer.innerHTML = playerHTML;
+    playerModal.classList.add('active');
+    setTimeout(() => {
+      attachVideoErrorHandler(playerContainer);
+    }, 50);
+  }
+
+  function closePlayerModal() {
+    playerModal.classList.remove('active');
+    playerContainer.innerHTML = '';
+  }
+
+  closePlayerBtn.addEventListener('click', closePlayerModal);
+
+  // Toast
+  let toastTimeout = null;
+  function showToast(message, borderColor = '#9F7AEA') {
+    let existingToast = document.querySelector('.toast-message');
+    if (existingToast) existingToast.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.innerText = message;
+    toast.style.borderLeftColor = borderColor;
+    document.body.appendChild(toast);
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      if (toast) toast.remove();
+    }, 2800);
+  }
+
+  // Search listener
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', () => renderVideos());
+
+  // Initialize
+  function init() {
+    loadInitialData();
+    renderVideos();
+  }
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PDF Quiz Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0c1a;font-family:'Space Grotesk',sans-serif;color:#e2deff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#1a1530;border:1.5px solid #2e2850;border-radius:20px;padding:32px;width:100%;max-width:680px;box-shadow:0 8px 48px rgba(124,92,252,0.15)}
+h1{font-family:'Syne',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,#a78bfa,#ffd166);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btn{padding:11px 26px;border-radius:10px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;transition:all .2s}
+.btn-primary{background:#7c5cfc;color:#fff}
+.btn-primary:hover{background:#a78bfa;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:default;transform:none}
+.btn-ghost{background:transparent;color:#7a72a0;border:1.5px solid #2e2850}
+.btn-ghost:hover{color:#e2deff;border-color:#a78bfa}
+.btn-ghost:disabled{opacity:.3;cursor:default}
+.option{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:12px;border:1.5px solid #2e2850;margin-bottom:9px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.02);font-size:.93rem;line-height:1.4}
+.option:hover:not(.disabled){border-color:#7c5cfc;background:rgba(124,92,252,0.08)}
+.option.correct{border-color:#22d3a0;background:rgba(34,211,160,0.1);color:#22d3a0}
+.option.wrong{border-color:#f87171;background:rgba(248,113,113,0.1);color:#f87171}
+.option.disabled{cursor:default}
+.letter{min-width:32px;height:32px;border-radius:8px;background:#2e2850;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.badge{background:#7c5cfc;color:#fff;border-radius:8px;padding:3px 11px;font-size:.78rem;font-weight:700;display:inline-block}
+.src-badge{background:#2e2850;color:#a78bfa;border-radius:6px;padding:2px 9px;font-size:.72rem;font-weight:600;display:inline-block;margin-bottom:12px}
+.progress-bar{height:5px;background:#2e2850;border-radius:99px;margin:12px 0 20px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#7c5cfc,#a78bfa);border-radius:99px;transition:width .4s}
+.feedback{margin-top:12px;padding:10px 14px;border-radius:10px;font-size:.88rem;font-weight:600}
+.feedback.ok{background:rgba(34,211,160,0.1);color:#22d3a0}
+.feedback.bad{background:rgba(248,113,113,0.1);color:#f87171}
+.nav{display:flex;gap:10px;margin-top:22px;justify-content:space-between;align-items:center}
+.score-circle{width:120px;height:120px;border-radius:50%;border:5px solid #7c5cfc;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:20px auto}
+.score-num{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:#a78bfa}
+.summary-item{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #2e2850;font-size:.82rem;color:#7a72a0}
+.help-row{display:flex;gap:10px;margin-top:12px}
+.btn-notes{flex:1;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(255,209,102,0.35);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.84rem;background:rgba(255,209,102,0.08);color:#ffd166;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-notes:hover{background:rgba(255,209,102,0.18);border-color:#ffd166;transform:translateY(-1px)}
+.btn-video{flex:1;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(248,113,113,0.3);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.84rem;background:rgba(248,113,113,0.08);color:#f87171;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-video:hover{background:rgba(248,113,113,0.18);border-color:#f87171;transform:translateY(-1px)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
+.modal{background:#1a1530;border:1.5px solid #2e2850;border-radius:20px;padding:28px;width:100%;max-width:620px;max-height:82vh;overflow-y:auto;position:relative;box-shadow:0 12px 60px rgba(124,92,252,0.3)}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:5px;padding-right:40px;line-height:1.4}
+.modal-sub{color:#7a72a0;font-size:.76rem;margin-bottom:18px}
+.modal-close{position:absolute;top:18px;right:18px;background:#2e2850;border:none;color:#e2deff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.85rem;font-family:'Space Grotesk',sans-serif;font-weight:700}
+.modal-close:hover{background:#3e3870}
+.note-point{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #2e2850;font-size:.9rem;line-height:1.55}
+.note-point:last-child{border-bottom:none}
+.note-dot{min-width:8px;height:8px;border-radius:50%;background:#a78bfa;margin-top:8px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="card">
+  <div id="quizScreen">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span class="badge" id="qBadge">Q 1 / 48</span>
+      <span style="color:#7a72a0;font-size:.78rem">📄 nutrition_chapter_1.pdf</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:2%"></div></div>
+    <div id="srcBadge" class="src-badge"></div>
+    <p style="font-size:1.02rem;line-height:1.6;margin-bottom:18px;font-weight:500" id="qText"></p>
+    <div id="optionsDiv"></div>
+    <div id="feedbackDiv" class="feedback" style="display:none"></div>
+    <div id="helpRow" class="help-row" style="display:none">
+      <button class="btn-notes" onclick="openNotes()">📖 PDF Notes</button>
+      <button class="btn-video" onclick="openVideo()">▶️ Video Dekho</button>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" id="prevBtn" onclick="prevQ()">⬅️ पिछला</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextQ()" disabled>अगला ➡️</button>
+    </div>
+  </div>
+
+  <div id="doneScreen" style="display:none;text-align:center">
+    <h1>Result 🎓</h1>
+    <div class="score-circle">
+      <span class="score-num" id="scoreNum">0/0</span>
+      <span style="font-size:.72rem;color:#7a72a0">Score</span>
+    </div>
+    <p style="color:#7a72a0;margin-bottom:4px" id="scoreMsg"></p>
+    <p style="color:#7a72a0;font-size:.82rem;margin-bottom:20px" id="scorePct"></p>
+    <div id="summaryDiv" style="text-align:left;margin-bottom:20px;max-height:300px;overflow-y:auto"></div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-ghost" onclick="restart()">🔁 Dobara Karo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Modal -->
+<div id="notesModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeNotes()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeNotes()">✕ बंद करें</button>
+    <div class="modal-title" id="notesTitle" style="color:#ffd166"></div>
+    <div class="modal-sub">📖 PDF से मुख्य बिंदु — इस topic को समझो</div>
+    <div id="notesBody"></div>
+  </div>
+</div>
+
+<!-- Video Modal -->
+<div id="videoModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeVideo()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeVideo()">✕ बंद करें</button>
+    <div class="modal-title" id="videoTitle" style="color:#f87171"></div>
+    <div class="modal-sub">▶️ YouTube पर इस topic का video देखो</div>
+    <div id="videoBody"></div>
+  </div>
+</div>
+
+<script>
+const questions=[
+  {src:"RRB Group-D 01/09/2022 (Shift-III)",q:"निम्न में से कौन सा प्रकाश संश्लेषण में उत्पन्न अपशिष्ट उत्पाद है?",options:["A. ग्लूकोज","B. जल","C. कार्बन डाईऑक्साइड","D. ऑक्सीजन"],answer:"D",topic:"प्रकाश संश्लेषण"},
+  {src:"RRB Group-D 29/08/2022 (Shift-II)",q:"स्वपोषी पोषण के लिए निम्न में से किसकी आवश्यकता नहीं होती है?",options:["A. ऑक्सीजन","B. कार्बन डाइऑक्साइड","C. प्रकाश","D. क्लोरोफिल"],answer:"A",topic:"प्रकाश संश्लेषण"},
+  {src:"RRB Group-D 20/09/2022 (Shift-III)",q:"प्रकाश संश्लेषण के दौरान, ___ से जल के छह अणु बनते हैं।",options:["A. 6H₂O","B. 12H₂O","C. 18H₂O","D. 24H₂O"],answer:"B",topic:"प्रकाश संश्लेषण"},
+  {src:"RRB NTPC 09.03.2021 (Shift-I)",q:"प्रकाश संश्लेषण की दर किस रंग के प्रकाश में अधिकतम होती है?",options:["A. बैंगनी","B. हरा","C. लाल","D. पीला"],answer:"C",topic:"प्रकाश संश्लेषण"},
+  {src:"RRB Group-D 16-11-2018 (Shift-I)",q:"__________ एक परजीवी पौधा है।",options:["A. आर्किड","B. लीच","C. सागौन","D. अमरबेल"],answer:"D",topic:"परजीवी पोषण"},
+  {src:"RRB Technicians Grade III 27-12-2024 (Shift-3)",q:"निम्नलिखित में से कौन-सा एक परजीवी जीव नहीं है?",options:["A. टिक","B. अमीबा","C. जूँ","D. अमरबेल"],answer:"B",topic:"परजीवी पोषण"},
+  {src:"RRB JE 24.05.2019 (Shift-III)",q:"मशरूम एक __________ है।",options:["A. स्लाइम मोल्ड","B. कवक","C. जंतु","D. पौधा"],answer:"B",topic:"मृतोपजीवी पोषण"},
+  {src:"RRB Group-D 20/09/2022 (Shift-I)",q:"मशरूम में किस प्रकार का पोषण पाया जाता है?",options:["A. रसायनपोषी","B. सैप्रोट्रॉफिक","C. सहजीवी","D. स्वपोषी"],answer:"B",topic:"मृतोपजीवी पोषण"},
+  {src:"RRB Technicians Grade III 23-12-2024 (Shift-1)",q:"निम्नलिखित में से किस जीव को सामान्यतः ब्रेड मोल्ड कहा जाता है?",options:["A. प्लेनेरिया","B. यीस्ट","C. स्पाइरोगाइरा","D. राइजोपस"],answer:"D",topic:"मृतोपजीवी पोषण"},
+  {src:"RRB NTPC 01.04.2021 (Shift-I)",q:"पोषण के उस प्रकार का नाम बताइए जिसमें जीव, मृत और सड़ते हुए पदार्थों से पोषक तत्व ग्रहण करता है।",options:["A. विषमपोषी पोषण","B. स्वपोषी पोषण","C. कीटभक्षी पोषण","D. मृतोपजीवी पोषण"],answer:"D",topic:"मृतोपजीवी पोषण"},
+  {src:"RRB NTPC 03.03.2021 (Shift-II)",q:"निम्नलिखित में से कौन-सा सैप्रोफाइटिक कवक है?",options:["A. शैवाल","B. फीताकृमि","C. कस्कुटा","D. पेनिसिलियम"],answer:"D",topic:"मृतोपजीवी पोषण"},
+  {src:"RRB NTPC 16.04.2016 (Shift-I)",q:"निम्नलिखित में से कौन-सा नाइट्रोजन स्थिरीकरण करने वाला जीवाणु है?",options:["A. साल्मोनेला","B. राइजोबियम","C. ई. कोलाई","D. प्सूडोमोनास"],answer:"B",topic:"सहजीवी पोषण"},
+  {src:"RRB NTPC 28.12.2020 (Shift-I)",q:"निम्नलिखित में से कौन-सा सहजीवी संबंध दर्शाता है?",options:["A. लाइकेन","B. यूलोथिक्स","C. मार्सिलिया","D. फ्यूनारिया"],answer:"A",topic:"सहजीवी पोषण"},
+  {src:"RRB JE 31.05.2019 (Shift-I)",q:"निम्नलिखित में से कौन सा कीटभक्षी पौधा नहीं है?",options:["A. प्रोथैलस","B. पिचर-प्लांट","C. वीनस फ्लाई ट्रैप","D. सनड्यू"],answer:"A",topic:"कीटभक्षी पादप"},
+  {src:"RRB Group-D 14-09-2022 (Shift-I)",q:"निम्नलिखित में से किस खाद्य पदार्थ को 'शरीर-निर्माण' वाला भोजन कहा जाता है?",options:["A. कार्बोहाइड्रेट से भरपूर जैसे गेहूं","B. प्रोटीन से भरपूर जैसे मटर","C. विटामिन से भरपूर जैसे सेब","D. वसा से भरपूर जैसे मक्खन"],answer:"B",topic:"पोषक तत्व"},
+  {src:"RRB Group-D 05-11-2018 (Shift-II)",q:"निम्न में से क्या मैक्रो पोषक तत्व नहीं है?",options:["A. विटामिन","B. वसा","C. कार्बोहाइड्रेट","D. प्रोटीन"],answer:"A",topic:"पोषक तत्व"},
+  {src:"RRB Group-D (Previous Year)",q:"p-मोनोसैकेराइड, q-डाईसैकेराइड, r-पॉलीसैकेराइड को 1-लैक्टोज, 2-ग्लाइकोजन, 3-ग्लूकोज से मिलाएं:",options:["A. p-2, q-3, r-1","B. p-3, q-1, r-2","C. p-1, q-2, r-3","D. p-3, q-2, r-1"],answer:"B",topic:"कार्बोहाइड्रेट के प्रकार"},
+  {src:"RRB Group-D 15/09/2022 (Shift-I)",q:"ग्लूकोज का रासायनिक सूत्र क्या है?",options:["A. C₂H₅OH","B. C₆H₁₂O₆","C. C₆H₁₄O₈","D. CH₃COOH"],answer:"B",topic:"कार्बोहाइड्रेट"},
+  {src:"RRB Technicians Grade III 23-12-2024 (Shift-3)",q:"ग्लूकोज अणु के लिए परमाणुओं की सही संख्या ज्ञात कीजिए।",options:["A. 6","B. 12","C. 18","D. 24"],answer:"D",topic:"कार्बोहाइड्रेट"},
+  {src:"RRB NTPC 17.01.2021 (Shift-I)",q:"फलों को मीठा बनाने के लिए कौन सी शर्करा जिम्मेदार है?",options:["A. फ्रुक्टोज","B. माल्टोज","C. सुक्रोज","D. लैक्टोज"],answer:"A",topic:"मोनोसैकेराइड"},
+  {src:"RRB JE 02.06.2019 (Shift-III)",q:"पौधों में कोशिका भित्ति का निर्माण करने वाले जटिल कार्बोहाइड्रेट को क्या कहा जाता है?",options:["A. माल्टोज","B. सेलुलोज","C. सुक्रोज","D. लैक्टोज"],answer:"B",topic:"पॉलीसैकेराइड"},
+  {src:"RRB NTPC 05.04.2021 (Shift-II)",q:"निम्नलिखित में से कौन-सा शरीर में ग्लाइकोजन के रूप में संग्रहित होता है?",options:["A. कार्बोहाइड्रेट्स","B. प्रोटीन","C. लिपिड","D. विटामिन"],answer:"A",topic:"ग्लाइकोजन"},
+  {src:"Railway Technician 23/12/2024",q:"पौधों में तुरंत उपयोग न होने वाले कार्बोहाइड्रेट ___ के रूप में संग्रहित होते हैं।",options:["A. ग्लूकोज","B. सेल्युलोज","C. स्टार्च","D. ग्लाइकोजन"],answer:"C",topic:"स्टार्च"},
+  {src:"RRB ALP CBT 1 26th Nov 2024",q:"निम्नलिखित में से क्या पौधों में रक्षित आंतरिक ऊर्जा की तरह कार्य करता है?",options:["A. ग्लूकोज","B. ग्लाइकोजन","C. सुक्रोज","D. स्टार्च"],answer:"D",topic:"स्टार्च"},
+  {src:"RRB JE 24.05.2019 (Shift-I)",q:"प्रोटीन ________ का एक अभिन्न अंग है।",options:["A. एंटीबॉडी","B. एंजाइम","C. कोशिका झिल्ली","D. इनमें से सभी"],answer:"D",topic:"प्रोटीन"},
+  {src:"RRB Technicians Grade III 27-12-2024 (Shift-2)",q:"प्लाज्मा झिल्ली ____ से बनी होती है।",options:["A. केवल प्रोटीन","B. केवल सेल्युलोज","C. प्रोटीन और लिपिड दोनों","D. केवल लिपिड"],answer:"C",topic:"प्रोटीन"},
+  {src:"RRB Technicians Grade III 30-12-2024 (Shift-2)",q:"प्रोटीन का सरल रूप क्या है?",options:["A. ग्लूकोस","B. वसा अम्ल","C. ग्लिसरॉल","D. अमीनो अम्ल"],answer:"D",topic:"प्रोटीन"},
+  {src:"RRB NTPC 29.01.2021 (Shift-II)",q:"पाचन के बाद, प्रोटीन निम्न में परिवर्तित हो जाता है:",options:["A. छोटी गोलियाँ","B. स्टार्च","C. कार्बोहाइड्रेट","D. अमीनो एसिड"],answer:"D",topic:"प्रोटीन"},
+  {src:"RRB Group-D 07-10-2022 (Shift-I)",q:"निम्नलिखित में से कौन विकास के लिए प्रोटीन प्रदान करता है?",options:["A. पत्तेदार सब्जियाँ","B. दालें","C. सेब","D. अनाज"],answer:"B",topic:"प्रोटीन"},
+  {src:"RRB JE 22.05.2019 (Shift-III)",q:"बच्चों में प्रोटीन की कमी से होने वाले रोग को क्या कहा जाता है?",options:["A. क्वाशियोरकर","B. पेलाग्रा","C. बेरी-बेरी","D. रिकेट्स"],answer:"A",topic:"प्रोटीन की कमी"},
+  {src:"RRB NTPC 21.01.2021 (Shift-II)",q:"हमारे शरीर में प्रोटीन की कमी से कौन-सा रोग होता है?",options:["A. स्कवी","B. बेरी-बेरी","C. रिकेट्स","D. क्वाशियोरकर"],answer:"D",topic:"प्रोटीन की कमी"},
+  {src:"RRB JE 02.06.2019 (Shift-III)",q:"निम्नलिखित में से कौन-सा दूध का प्रोटीन है?",options:["A. ग्लाइसिन","B. गैलेक्टोज","C. रेनिन","D. केसीन"],answer:"D",topic:"विशेष प्रोटीन"},
+  {src:"RRB NTPC 14/06/2022 (Shift-I)",q:"निम्न में से किस आहारी घटक की प्रति ग्राम मात्रा, मनुष्यों में अधिकतम ऊर्जा प्रदान करती है?",options:["A. प्रोटीन","B. रूक्षांश","C. कार्बोहाइड्रेट","D. वसा"],answer:"D",topic:"वसा"},
+  {src:"RRB JE 02.06.2019 (Shift-III)",q:"ग्लिसरॉल को ________ के साथ मिलाकर लिपिड बनाए जाते हैं।",options:["A. फैटी एसिड","B. पेप्टाइड","C. ओलिगोसेकेराइड","D. डिसैकराइड"],answer:"A",topic:"वसा"},
+  {src:"RRB NTPC 07.04.2021 (Shift-I)",q:"निम्नलिखित में से जल में घुलनशील विटामिन की पहचान करें।",options:["A. विटामिन डी","B. विटामिन ई","C. विटामिन बी","D. विटामिन ए"],answer:"C",topic:"विटामिन"},
+  {src:"RRB JE 01.06.2019",q:"विटामिन B1 को .......... भी कहा जाता है।",options:["A. थायमिन","B. एस्कॉर्बिक एसिड","C. बायोटिन","D. नियासिन"],answer:"A",topic:"विटामिन B1"},
+  {src:"RRB NTPC 16.04.2016 (Shift-III)",q:"निम्नलिखित में से कौन सा विटामिन A का अच्छा स्रोत है?",options:["A. गोभी","B. गाजर","C. आलू","D. स्ट्रॉबेरी"],answer:"B",topic:"विटामिन A"},
+  {src:"RRB JE 28.06.2019 (Shift-IV)",q:"स्कवी रोग में मसूड़ों से खून आता है। इसे आहार में _______ शामिल करके रोका जा सकता है।",options:["A. विटामिन-A","B. कोलेस्ट्रॉल","C. विटामिन-C","D. प्रोटीन"],answer:"C",topic:"विटामिन C"},
+  {src:"RRB JE 26.05.2019 (Shift-I)",q:"सामान्य जुकाम के इलाज के लिए किस विटामिन का उपयोग किया जाता है?",options:["A. विटामिन D","B. विटामिन A","C. विटामिन C","D. विटामिन B"],answer:"C",topic:"विटामिन C"},
+  {src:"RRB JE 31.05.2019 (Shift-III)",q:"कौन-सा विटामिन शरीर में कैल्शियम के अवशोषण को बढ़ाता है?",options:["A. A","B. D","C. B","D. B6"],answer:"B",topic:"विटामिन D"},
+  {src:"RRB JE 02.06.2019 (Shift-III)",q:"मछली के लीवर ऑयल में _________ प्रचुर मात्रा में होता है।",options:["A. विटामिन-A","B. दोनों विटामिन A और विटामिन-D","C. विटामिन-E","D. विटामिन-D"],answer:"B",topic:"विटामिन D"},
+  {src:"RRB JE 26.06.2019 (Shift-I)",q:"विटामिन K, प्राकृतिक रूप से __________ में पाए जाने वाले जीवाणुओं द्वारा निर्मित होता है।",options:["A. अग्न्याशय","B. गुर्दा","C. हृदय","D. आंत"],answer:"D",topic:"विटामिन K"},
+  {src:"RRB NTPC 03.04.2016 (Shift-I)",q:"निम्नलिखित में से कौन सा विटामिन रक्त के थक्के बनाने में महत्वपूर्ण भूमिका निभाते हैं?",options:["A. विटामिन B12","B. विटामिन D","C. विटामिन A","D. विटामिन E"],answer:"D",topic:"विटामिन K"},
+  {src:"RRB JE 28.05.2019 (Shift-I)",q:"पेलाग्रा __________ की कमी के कारण होता है।",options:["A. राइबोफ्लेविन","B. फोलिक एसिड","C. नियासिन","D. एस्कॉर्बिक"],answer:"C",topic:"विटामिन B3"},
+  {src:"RRB NTPC 11.01.2021 (Shift-II)",q:"मेगालोब्लास्टिक एनीमिया किस विटामिन की कमी के कारण होता है?",options:["A. विटामिन A","B. विटामिन C","C. विटामिन B2","D. विटामिन B9"],answer:"D",topic:"विटामिन B9"},
+  {src:"RRB NTPC 15.03.2021 (Shift-I)",q:"कोबाल्ट किस विटामिन में पाया जाता है?",options:["A. विटामिन B12","B. विटामिन B5","C. विटामिन B3","D. विटामिन B1"],answer:"A",topic:"विटामिन B12"},
+  {src:"RRB NTPC 01.02.2021 (Shift-I)",q:"निम्नलिखित में से कौन-से विटामिन यीस्ट में प्रचुर मात्रा में पाया जाता है?",options:["A. विटामिन B","B. विटामिन C","C. विटामिन K","D. विटामिन A"],answer:"A",topic:"विटामिन B12"},
+  {src:"RRB NTPC 02.04.2016 (Shift-III)",q:"निम्नलिखित में से कौन सा एक कैल्शियम का समृद्ध स्रोत नहीं है?",options:["A. पनीर","B. कोलार्ड ग्रीन्स","C. अंजीर","D. गाजर"],answer:"D",topic:"कैल्शियम"},
+  {src:"ALP 29 Nov 2024 | 1st Shift",q:"थायरोक्सिन हार्मोन के उत्पादन के लिए थायरॉइड ग्रंथि को किस तत्व की आवश्यकता होती है?",options:["A. सोडियम","B. आयोडीन","C. कैल्शियम","D. पोटेशियम"],answer:"B",topic:"आयोडीन"}
+];
+
+const notes={
+  "प्रकाश संश्लेषण":["समीकरण: 6CO₂ + 12H₂O → C₆H₁₂O₆ + 6H₂O + 6O₂","O₂ अपशिष्ट उत्पाद के रूप में निकलती है — Glucose नहीं।","प्रकाश की जरूरत: White > Red > Blue। सबसे कम — हरा रंग।","स्वपोषी पोषण के लिए CO₂, H₂O, प्रकाश, क्लोरोफिल चाहिए — O₂ नहीं।","12H₂O → 6H₂O (उत्पाद) + 6O₂ बनता है।"],
+  "परजीवी पोषण":["परजीवी — दूसरे जीव (होस्ट) पर/अंदर रहकर पोषण।","अमरबेल (Cuscuta) — परजीवी पौधा।","अमीबा — परजीवी नहीं! यह होलोजोइक पोषण करता है।","जूँ (Lice), टिक — परजीवी जीव हैं।"],
+  "मृतोपजीवी पोषण":["मृत-सड़े पदार्थों से पोषण — मृतोपजीवी।","पाचक एंजाइम बाहर छोड़ते हैं — इसलिए बाह्य पाचन।","मशरूम, राइजोपस (ब्रेड मोल्ड), पेनिसिलियम — सब मृतोपजीवी कवक।","बैक्टीरिया भी मृतोपजीवी हो सकते हैं।"],
+  "सहजीवी पोषण":["दोनों जीवों को लाभ — सहजीवी।","लाइकेन = शैवाल + कवक (शैवाल भोजन, कवक सुरक्षा देता है)।","राइजोबियम — दलहनी पौधों में नाइट्रोजन स्थिरीकरण।"],
+  "कीटभक्षी पादप":["वीनस फ्लाईट्रैप, पिचर प्लांट, सनड्यू — कीटभक्षी हैं।","प्रोथैलस — कीटभक्षी नहीं, यह फर्न का युग्मकोद्भिद है।"],
+  "पोषक तत्व":["ऊर्जा: कार्बोहाइड्रेट + वसा। शरीर निर्माण: प्रोटीन। संरक्षी: विटामिन + खनिज।","मैक्रो-पोषक: कार्बोहाइड्रेट, प्रोटीन, वसा, पानी।","माइक्रो-पोषक: विटामिन और खनिज।","विटामिन — मैक्रो नहीं, माइक्रो-पोषक है।"],
+  "कार्बोहाइड्रेट के प्रकार":["मोनोसैकेराइड: ग्लूकोज (3), फ्रुक्टोज, गैलेक्टोज।","डाईसैकेराइड: सुक्रोज=Glu+Fru, लैक्टोज(1)=Glu+Gal, माल्टोज=Glu+Glu।","पॉलीसैकेराइड: स्टार्च, सेलुलोज, ग्लाइकोजन(2)।"],
+  "कार्बोहाइड्रेट":["ग्लूकोज सूत्र: C₆H₁₂O₆ — C=6, H=12, O=6, कुल परमाणु = 24।","1 ग्राम से 4 Kcal ऊर्जा।","सामान्य सूत्र: Cₓ(H₂O)ᵧ"],
+  "मोनोसैकेराइड":["फ्रुक्टोज — फलों की मिठास, सबसे मीठी शर्करा।","ग्लूकोज — रक्त शर्करा (Blood Sugar)।","गैलेक्टोज — लैक्टोज टूटने से बनता है।"],
+  "पॉलीसैकेराइड":["सेलुलोज — पौधों की कोशिका भित्ति में।","स्टार्च — पौधों में कार्बोहाइड्रेट संग्रह (आलू, चावल)।","ग्लाइकोजन — जंतुओं में कार्बोहाइड्रेट संग्रह।"],
+  "ग्लाइकोजन":["ग्लाइकोजन — जंतुओं में (यकृत/मांसपेशी) कार्बोहाइड्रेट संग्रह।","पौधों में स्टार्च, जंतुओं में ग्लाइकोजन।"],
+  "स्टार्च":["स्टार्च — पौधों का आंतरिक ऊर्जा भंडार।","आलू, चावल, गेहूं में पाया जाता है।","ग्लाइकोजन (जंतु) ≠ स्टार्च (पौधे)।"],
+  "प्रोटीन":["प्रोटीन = अमीनो अम्लों की श्रृंखला।","1g प्रोटीन = 4 Kcal।","एंजाइम, हार्मोन, एंटीबॉडी, कोशिका झिल्ली — सभी में प्रोटीन।","प्लाज्मा झिल्ली = प्रोटीन + लिपिड।","पाचन के बाद प्रोटीन → अमीनो एसिड।","दालें — सबसे अच्छा पादप प्रोटीन।"],
+  "प्रोटीन की कमी":["क्वाशियोरकर: प्रोटीन कमी — पेट सूजन, हाथ-पैर पतले।","मैरास्मस: प्रोटीन + कैलोरी दोनों की कमी — दुबलापन, सूजन नहीं।"],
+  "विशेष प्रोटीन":["केसीन — दूध में।","हीमोग्लोबिन — RBC में।","केराटिन — बाल, नाखून।","कोलेजन — हड्डी, त्वचा।","मायोसिन — मांसपेशी।"],
+  "वसा":["1g वसा = 9.3 Kcal — सबसे अधिक।","लिपिड = फैटी एसिड + ग्लिसरॉल।","वसा एडिपॉज ऊतक में संग्रहित।","विटामिन A,D,E,K अवशोषण में मदद।"],
+  "विटामिन":["वसा में घुलनशील: A, D, E, K (ADEK)।","जल में घुलनशील: B (सभी), C।","वसा में घुलनशील शरीर में संग्रहित हो सकते हैं।"],
+  "विटामिन B1":["विटामिन B1 = थायमिन।","स्रोत: साबुत अनाज, दालें, मेवे।","कमी से बेरी-बेरी रोग।"],
+  "विटामिन A":["विटामिन A = रेटिनॉल।","गाजर, शकरकंद, पालक — अच्छे स्रोत।","कमी से रतौंधी, जीरोफ्थैल्मिया।"],
+  "विटामिन C":["विटामिन C = एस्कॉर्बिक एसिड।","खट्टे फल, आंवला, टमाटर।","कमी से स्कवी — मसूड़ों से खून।","जुकाम में भी उपयोगी।"],
+  "विटामिन D":["विटामिन D = कैल्सिफेरोल।","सूर्य प्रकाश, मछली का तेल।","कैल्शियम अवशोषण के लिए जरूरी।","कमी से रिकेट्स (बच्चे) / ऑस्टियोमलेशिया।","मछली लीवर ऑयल में A और D दोनों।"],
+  "विटामिन K":["विटामिन K = फाइलोक्विनोन।","रक्त का थक्का जमाने में भूमिका।","आंत के बैक्टीरिया बनाते हैं।","हरी पत्तेदार सब्जियों में मिलता है।"],
+  "विटामिन B3":["विटामिन B3 = नियासिन।","कमी से पेलाग्रा।","पेलाग्रा = 4D: Dermatitis, Diarrhoea, Dementia, Death।"],
+  "विटामिन B9":["विटामिन B9 = फोलेट।","DNA निर्माण, RBC गठन।","कमी से मेगालोब्लास्टिक एनीमिया।"],
+  "विटामिन B12":["विटामिन B12 = कोबालामिन।","इसमें कोबाल्ट (Cobalt) धातु होती है।","यीस्ट में विटामिन B प्रचुर मात्रा में।","कमी से पर्निशस एनीमिया।"],
+  "कैल्शियम":["हड्डियों, दांतों के लिए जरूरी।","स्रोत: दूध, पनीर, हरी सब्जियां, अंजीर।","गाजर — कैल्शियम का अच्छा स्रोत नहीं।","कमी से ऑस्टियोपोरोसिस, रिकेट्स।"],
+  "आयोडीन":["थायरॉइड के लिए — थायरोक्सिन हार्मोन बनाता है।","आयोडीन युक्त नमक, समुद्री भोजन।","कमी से गोइटर (घेंघा)।"]
+};
+
+const videoQ={
+  "प्रकाश संश्लेषण":"photosynthesis biology hindi RRB exam",
+  "परजीवी पोषण":"parasitic nutrition cuscuta hindi biology",
+  "मृतोपजीवी पोषण":"saprophytic nutrition mushroom hindi",
+  "सहजीवी पोषण":"symbiotic nutrition lichen rhizobium hindi",
+  "कीटभक्षी पादप":"insectivorous plants venus flytrap hindi",
+  "पोषक तत्व":"nutrients food macronutrients hindi RRB",
+  "कार्बोहाइड्रेट के प्रकार":"types carbohydrates monosaccharide hindi",
+  "कार्बोहाइड्रेट":"glucose formula carbohydrates hindi",
+  "मोनोसैकेराइड":"monosaccharide fructose glucose hindi",
+  "पॉलीसैकेराइड":"polysaccharides cellulose starch glycogen hindi",
+  "ग्लाइकोजन":"glycogen storage carbohydrate animals hindi",
+  "स्टार्च":"starch plants energy storage hindi",
+  "प्रोटीन":"protein amino acids hindi biology RRB",
+  "प्रोटीन की कमी":"kwashiorkor marasmus protein deficiency hindi",
+  "विशेष प्रोटीन":"casein keratin collagen proteins hindi",
+  "वसा":"fats lipids energy body hindi",
+  "विटामिन":"vitamins fat soluble water soluble hindi",
+  "विटामिन B1":"vitamin B1 thiamine beriberi hindi",
+  "विटामिन A":"vitamin A retinol night blindness hindi",
+  "विटामिन C":"vitamin C scurvy ascorbic acid hindi",
+  "विटामिन D":"vitamin D calcium absorption rickets hindi",
+  "विटामिन K":"vitamin K blood clotting hindi",
+  "विटामिन B3":"vitamin B3 niacin pellagra hindi",
+  "विटामिन B9":"vitamin B9 folic acid anemia hindi",
+  "विटामिन B12":"vitamin B12 cobalt cobalamin hindi",
+  "कैल्शियम":"calcium mineral bones hindi RRB",
+  "आयोडीन":"iodine thyroid goiter hindi"
+};
+
+let current=0, answered={};
+
+function renderQuestion(){
+  const q=questions[current], total=questions.length;
+  document.getElementById('qBadge').textContent='Q '+(current+1)+' / '+total;
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('srcBadge').textContent='📋 '+q.src;
+  document.getElementById('progressFill').style.width=(((current+1)/total)*100)+'%';
+  document.getElementById('prevBtn').disabled=current===0;
+  const isAns=answered[current]!==undefined, ua=answered[current];
+  document.getElementById('nextBtn').disabled=!isAns;
+  document.getElementById('nextBtn').innerHTML=current===total-1?'🏁 Result Dekho':'अगला ➡️';
+
+  const div=document.getElementById('optionsDiv');
+  div.innerHTML='';
+  q.options.forEach(opt=>{
+    const l=opt.charAt(0).toUpperCase(), isCor=l===q.answer.toUpperCase(), isSel=ua&&ua.charAt(0).toUpperCase()===l;
+    let cls='option';
+    if(isAns){cls+=' disabled'; if(isCor)cls+=' correct'; else if(isSel)cls+=' wrong';}
+    const el=document.createElement('div');
+    el.className=cls;
+    el.innerHTML=`<span class="letter">${l}</span><span style="flex:1">${opt.slice(2).trim()}</span>`
+      +(isAns&&isCor?'<span>✅</span>':'')+(isAns&&isSel&&!isCor?'<span>❌</span>':'');
+    if(!isAns)el.addEventListener('click',()=>selectAnswer(opt));
+    div.appendChild(el);
+  });
+
+  const fb=document.getElementById('feedbackDiv'), hr=document.getElementById('helpRow');
+  if(isAns){
+    const correct=ua.charAt(0).toUpperCase()===q.answer.toUpperCase();
+    fb.style.display='block';
+    fb.className='feedback '+(correct?'ok':'bad');
+    fb.textContent=correct?'🎉 Sahi jawab!':'❌ Galat! Sahi jawab: '+q.answer.toUpperCase();
+    hr.style.display=correct?'none':'flex';
+  } else {
+    fb.style.display='none';
+    hr.style.display='none';
+  }
+}
+
+function selectAnswer(opt){
+  if(answered[current]!==undefined)return;
+  answered[current]=opt;
+  renderQuestion();
+}
+function nextQ(){if(current<questions.length-1){current++;renderQuestion();}else showResult();}
+function prevQ(){if(current>0){current--;renderQuestion();}}
+
+function openNotes(){
+  const q=questions[current], topic=q.topic||'Topic';
+  const pts=notes[topic]||['Is topic ke baare mein PDF mein detail maujood hai.'];
+  document.getElementById('notesTitle').textContent='📖 '+topic;
+  document.getElementById('notesBody').innerHTML=pts.map(p=>
+    `<div class="note-point"><span class="note-dot"></span><span>${p}</span></div>`
+  ).join('');
+  document.getElementById('notesModal').style.display='flex';
+}
+function closeNotes(){document.getElementById('notesModal').style.display='none';}
+
+function openVideo(){
+  const q=questions[current], topic=q.topic||'biology nutrition';
+  const query=videoQ[topic]||(topic+' hindi biology RRB');
+  const url='https://www.youtube.com/results?search_query='+encodeURIComponent(query);
+  document.getElementById('videoTitle').textContent='▶️ '+topic;
+  document.getElementById('videoBody').innerHTML=`
+    <div style="background:#2e2850;border-radius:14px;padding:22px;text-align:center;margin-bottom:14px">
+      <div style="font-size:2.8rem;margin-bottom:10px">🎬</div>
+      <p style="font-size:.95rem;color:#a78bfa;font-weight:700;margin-bottom:8px">${topic}</p>
+      <p style="font-size:.8rem;color:#7a72a0;margin-bottom:18px">YouTube pe is topic ke detailed videos milenge</p>
+      <a href="${url}" target="_blank" style="display:inline-block;padding:12px 28px;background:#f87171;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem;letter-spacing:.3px">▶️ YouTube pe Dekho</a>
+    </div>
+    <div style="background:#1e1a38;border-radius:10px;padding:14px;font-size:.82rem;color:#7a72a0;line-height:1.7">
+      🔍 <strong style="color:#a78bfa">YouTube Search:</strong><br>
+      <span style="color:#ffd166;font-style:italic">"${query}"</span>
+    </div>`;
+  document.getElementById('videoModal').style.display='flex';
+}
+function closeVideo(){document.getElementById('videoModal').style.display='none';}
+
+function showResult(){
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('doneScreen').style.display='block';
+  let score=0;
+  questions.forEach((q,i)=>{if((answered[i]||'').charAt(0).toUpperCase()===q.answer.toUpperCase())score++;});
+  document.getElementById('scoreNum').textContent=score+'/'+questions.length;
+  document.getElementById('scorePct').textContent=Math.round((score/questions.length)*100)+'% correct';
+  const msgs=['Ek baar phir practice karo! 🔁','Theek hai, mehnat karo! 📖','Bahut accha! 💪','Kamaal! Sab sahi! 🌟'];
+  document.getElementById('scoreMsg').textContent=msgs[score===questions.length?3:score>=questions.length*.7?2:score>=questions.length*.5?1:0];
+  const sd=document.getElementById('summaryDiv');
+  sd.innerHTML='';
+  questions.forEach((q,i)=>{
+    const ok=(answered[i]||'').charAt(0).toUpperCase()===q.answer.toUpperCase();
+    const el=document.createElement('div');
+    el.className='summary-item';
+    el.innerHTML=`<span>${ok?'✅':'❌'}</span><span>${i+1}. ${q.q.slice(0,55)}${q.q.length>55?'...':''}</span>`;
+    sd.appendChild(el);
+  });
+}
+
+function restart(){
+  current=0;answered={};
+  document.getElementById('doneScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
